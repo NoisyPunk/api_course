@@ -1,6 +1,7 @@
 import requests
 import pytest
 from lib.base_case import BaseCase
+from lib.assertions import Assertions
 
 class TestUserAuth(BaseCase):
     exclude_params = [
@@ -28,10 +29,17 @@ class TestUserAuth(BaseCase):
             cookies={"auth_sid": self.auth_sid}
         )
 
-        assert "user_id" in response2.json(), "There is no user id in the second response"
-        user_id_from_check_method = response2.json()["user_id"]
+        Assertions.assert_json_value_by_name(
+            response2,
+            "user_id",
+            self.user_id_from_auth_method,
+            "User id from auth metod is not equal to user id from check method"
+        )
 
-        assert self.user_id_from_auth_method == user_id_from_check_method, "User id from auth method is not equal to user id fron check method"
+        # assert "user_id" in response2.json(), "There is no user id in the second response"
+        # user_id_from_check_method = response2.json()["user_id"]
+        #
+        # assert self.user_id_from_auth_method == user_id_from_check_method, "User id from auth method is not equal to user id fron check method"
 
     @pytest.mark.parametrize('condition', exclude_params)
     def test_negative_auth_check(self, condition):
@@ -46,6 +54,14 @@ class TestUserAuth(BaseCase):
                 "https://playground.learnqa.ru/api/user/auth",
                 cookies={"auth_sid": self.auth_sid}
             )
+
+        Assertions.assert_json_value_by_name(
+            response2,
+            "user_id",
+            0,
+            "User id from auth metod is not equal to user id from check method"
+        )
+
 
         assert "user_id" in response2.json(), "There is no user id in the second response"
 
